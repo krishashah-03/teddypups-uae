@@ -1,26 +1,268 @@
 @import "tailwindcss";
 
+@theme {
+  --color-milk: #fffdf8;
+  --color-cocoa: #2a170e;
+  --color-cocoa-soft: #5a3a28;
+  --color-toffee: #c2622b;
+  --color-toffee-deep: #a24a1a;
+  --color-toffee-ink: #8e3f15;
+  --color-honey: #f2be6b;
+  --color-honey-soft: #fbe3b4;
+  --color-blush: #f9cdbf;
+  --color-sky: #bfddf5;
+  --color-sky-deep: #2f6e9e;
+  --color-night: #24130b;
+  --color-leaf: #1f7a52;
+  --color-leaf-deep: #145a3a;
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-hand: var(--font-shantell), ui-rounded, "Comic Sans MS", cursive;
+  --ease-pounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-silk: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --gutter: clamp(1rem, 4vw, 3.5rem);
+  --header-h: 4rem;
+  --bar-h: 0px;
+}
+@media (min-width: 768px) {
+  :root { --header-h: 4.75rem; }
+}
+@media (max-width: 767px) {
+  :root { --bar-h: calc(4rem + env(safe-area-inset-bottom)); }
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h) + 1rem); }
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-milk);
+  color: var(--color-cocoa);
+  font-family: var(--font-sans);
+  padding-bottom: var(--bar-h);
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--color-honey); }
+
+@layer components {
+.wrap { width: 100%; max-width: 80rem; margin-inline: auto; padding-inline: var(--gutter); }
+.display { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.02em; line-height: 1.02; font-variation-settings: "SOFT" 100, "WONK" 1; }
+.hand { font-family: var(--font-hand); }
+
+/* chunky "pressable" buttons with a hard bottom shadow */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  border-radius: 999px; padding: .75rem 1.4rem; font-weight: 700; font-size: .95rem;
+  border: 2px solid var(--color-cocoa);
+  transition: transform .2s var(--ease-pounce), box-shadow .2s var(--ease-pounce);
+  cursor: pointer; text-align: center;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(1px); }
+.btn-toffee { background: var(--color-toffee-deep); color: var(--color-milk); border-color: var(--color-toffee-deep); box-shadow: 0 4px 0 var(--color-cocoa); }
+.btn-leaf { background: var(--color-leaf); color: var(--color-milk); border-color: var(--color-leaf); box-shadow: 0 4px 0 var(--color-cocoa); }
+.btn-ghost { background: transparent; color: var(--color-cocoa); }
+.btn-ghost:hover { background: color-mix(in oklab, var(--color-milk) 60%, transparent); }
+
+/* reveal-on-scroll */
+.reveal { opacity: 0; transform: translateY(1.5rem); transition: opacity .7s var(--ease-silk), transform .7s var(--ease-silk); transition-delay: var(--d, 0ms); }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* scalloped edge along the top of the hero wall */
+.scallop {
+  --r: 1.5rem;
+  height: 1.6rem;
+  background: radial-gradient(circle at 50% 100%, var(--color-honey-soft) calc(var(--r) - 2px), var(--color-cocoa) calc(var(--r) - 2px) var(--r), transparent calc(var(--r) + 0.5px)) 0 0 / calc(var(--r) * 2) 100% repeat-x;
+}
+.lattice {
+  background-image:
+    linear-gradient(45deg, transparent 48%, color-mix(in oklab, var(--color-toffee) 22%, transparent) 49% 51%, transparent 52%),
+    linear-gradient(-45deg, transparent 48%, color-mix(in oklab, var(--color-toffee) 22%, transparent) 49% 51%, transparent 52%);
+  background-size: 2.5rem 2.5rem;
+}
+
+/* doors */
+.door-frame { position: relative; width: 100%; aspect-ratio: 3 / 4.4; border-radius: 999px 999px 0 0; border: 3px solid var(--color-cocoa); border-bottom: 0; overflow: hidden; background: var(--color-night); }
+.door-leaf { position: absolute; inset: 0; transform-origin: left center; transition: transform .7s var(--ease-pounce); }
+.door-link:hover .door-leaf, .door-link:focus-visible .door-leaf, .door-link.is-open .door-leaf { transform: perspective(900px) rotateY(-78deg); }
+.door-link:hover .door-tag, .door-link.is-open .door-tag { transform: rotate(-4deg) translateY(-2px); }
+.door-tag { transition: transform .3s var(--ease-pounce); }
+
+/* polaroid-style pictures */
+.polaroid { background: var(--color-milk); border: 2px solid var(--color-cocoa); border-radius: .5rem; padding: .5rem .5rem 1.5rem; box-shadow: 0 6px 0 rgb(0 0 0 / .18); transition: transform .3s var(--ease-pounce); }
+.polaroid:hover { transform: rotate(0deg) scale(1.03) !important; }
+
+.paper {
+  background-color: var(--color-milk);
+  border: 2px solid var(--color-cocoa);
+  border-radius: 1.25rem;
+  box-shadow: 0 6px 0 rgb(42 23 14 / .85);
+}
+.field {
+  width: 100%; background: transparent; border: 0; border-bottom: 2px dashed var(--color-cocoa-soft);
+  padding: .25rem .5rem; font: inherit; color: var(--color-toffee-ink); font-weight: 600; outline: none;
+}
+.field:focus { border-bottom-style: solid; border-color: var(--color-toffee); background: color-mix(in oklab, var(--color-honey) 18%, transparent); }
+.field::placeholder { color: color-mix(in oklab, var(--color-cocoa-soft) 55%, transparent); font-weight: 400; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+}
+
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+/* ---------- Teddy & friends ---------- */
+@keyframes pop { from { opacity: 0; transform: translate(-50%, 6px) scale(.7); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
+@keyframes wag { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(14deg); } }
+@keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+@keyframes stepA { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-7px) rotate(-8deg); } }
+@keyframes stepB { 0%, 100% { transform: translateY(-7px) rotate(8deg); } 50% { transform: translateY(0) rotate(0); } }
+@keyframes bounce-walk { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes hop { 0%, 100% { transform: translateY(0) scale(1, 1); } 30% { transform: translateY(0) scale(1.08, .9); } 55% { transform: translateY(-28px) scale(.95, 1.06); } 80% { transform: translateY(0) scale(1.06, .94); } }
+@keyframes heart-up { 0% { opacity: 0; transform: translateY(8px) scale(.6); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-34px) scale(1.1); } }
+@keyframes drift { 0% { transform: translate(0, 0) rotate(var(--rot, 0deg)); opacity: 0; } 15%, 85% { opacity: 1; } 50% { transform: translate(18px, -24px) rotate(calc(var(--rot, 0deg) + 20deg)); } 100% { transform: translate(-10px, -60px) rotate(var(--rot, 0deg)); opacity: 0; } }
+@keyframes twinkle { 0%, 100% { opacity: .2; transform: scale(.7); } 50% { opacity: 1; transform: scale(1.2); } }
+@keyframes paw-fade { 0% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r)) scale(.5); } 15% { opacity: .55; transform: translate(-50%, -50%) rotate(var(--r)) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r)) scale(.85); } }
+@keyframes fly { to { offset-distance: 100%; } }
+@keyframes msg-in { from { opacity: 0; transform: translateY(10px) scale(.92); } to { opacity: 1; transform: none; } }
+@keyframes wiggle { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+
+.teddy-tail { animation: wag 1.1s ease-in-out infinite; }
+.teddy-eyes { animation: blink 5s infinite; }
+.teddy-walking .teddy-leg.leg-a { animation: stepA .38s ease-in-out infinite; transform-origin: 50% 0; }
+.teddy-walking .teddy-leg.leg-b { animation: stepB .38s ease-in-out infinite; transform-origin: 50% 0; }
+.teddy-walking .teddy-head { animation: bounce-walk .38s ease-in-out infinite; }
+.teddy-walking .teddy-tail { animation-duration: .35s; }
+.teddy-jump { animation: hop .6s ease-out; }
+.teddy-heart { display: inline-block; opacity: 0; animation: heart-up 1.2s ease-out forwards; }
+
+.paw-print { position: absolute; width: 20px; height: 20px; color: var(--color-toffee); opacity: 0; animation: paw-fade 1.4s ease-out forwards; }
+.paw-print svg { width: 100%; height: 100%; }
+
+.floater { animation: drift 12s linear infinite; }
+.twinkle { animation: twinkle 3s ease-in-out infinite; }
+
+/* hanging scallops under the header */
+.scallop-down {
+  --r: 1.1rem;
+  position: absolute; left: 0; right: 0; top: calc(100% - 1px); height: var(--r); pointer-events: none;
+  background: radial-gradient(circle at 50% 0, var(--color-milk) calc(var(--r) - 2px), var(--color-cocoa) calc(var(--r) - 2px) var(--r), transparent calc(var(--r) + .5px)) 0 0 / calc(var(--r) * 2) 100% repeat-x;
+  clip-path: inset(1px 0 0 0);
+}
+
+/* starry night used behind dark sections */
+.night-sky {
+  background-color: var(--color-night);
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 22%, #fbe3b4 50%, transparent 52%),
+    radial-gradient(1px 1px at 28% 64%, #fbe3b4 50%, transparent 52%),
+    radial-gradient(2px 2px at 47% 18%, #fbe3b4 50%, transparent 52%),
+    radial-gradient(1px 1px at 63% 72%, #fbe3b4 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 78% 30%, #fbe3b4 50%, transparent 52%),
+    radial-gradient(1px 1px at 90% 58%, #fbe3b4 50%, transparent 52%),
+    radial-gradient(1px 1px at 6% 80%, #fbe3b4 50%, transparent 52%);
+}
+
+/* wood floor the doors stand on */
+.floor {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 calc(7rem - 2px), rgb(42 23 14 / .22) calc(7rem - 2px) 7rem),
+    linear-gradient(to bottom, #e0a85a, #c98a3c);
+  border-top: 3px solid var(--color-cocoa);
+}
+
+/* chat bubbles in the phone */
+.msg { opacity: 0; }
+.in .msg { animation: msg-in .5s var(--ease-pounce) forwards; animation-delay: var(--md, 0ms); }
+.paw-wallpaper {
+  background-color: #f4ead9;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='46' height='46' viewBox='0 0 24 24' fill='%23c2622b' fill-opacity='.12'><ellipse cx='6' cy='10' rx='2.3' ry='3'/><ellipse cx='10.5' cy='5.8' rx='2.3' ry='3'/><ellipse cx='16.5' cy='5.8' rx='2.3' ry='3'/><ellipse cx='21' cy='10' rx='2.3' ry='3'/><path d='M12.8 11c-3 0-6 3.6-6 6.2 0 2 1.6 2.8 3.4 2.8 1 0 1.7-.4 2.6-.4s1.6.4 2.6.4c1.8 0 3.4-.8 3.4-2.8 0-2.6-3-6.2-6-6.2z'/></svg>");
+  background-size: 46px;
+}
+.dots { background-image: radial-gradient(rgb(142 63 21 / .14) 1.2px, transparent 1.4px); background-size: 22px 22px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .teddy-tail, .teddy-eyes, .floater, .twinkle, .teddy-walking * { animation: none !important; }
+}
+
+/* =====================================================================
+   Teddy the roaming pup (see components/pup/*)
+   ===================================================================== */
+body { position: relative; cursor: url(/cursor/paw.svg) 9 6, auto; }
+a, button, summary, select, label[for], [role="button"], [role="tab"] { cursor: url(/cursor/paw-press.svg) 9 6, pointer; }
+input, textarea { cursor: text; }
+
+.pup-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.pup-svg .p-stand, .pup-svg .p-sit, .pup-svg .p-peek, .pup-svg .p-basket, .pup-svg .pup-collar { display: none; }
+.pup-svg:is([data-pose="stand"], [data-pose="walk"]) :is(.p-stand, .pup-collar) { display: inline; }
+.pup-svg[data-pose="sit"] :is(.p-sit, .pup-collar) { display: inline; }
+.pup-svg[data-pose="peek"] .p-peek { display: inline; }
+.pup-svg[data-pose="basket"] .p-basket { display: inline; }
+
+/* where the shared head sits for each pose */
+.pup-svg[data-pose="sit"] :is(.pup-head, .pup-collar) { translate: -12px 6px; }
+.pup-svg[data-pose="peek"] .pup-head { translate: 0 64px; }
+.pup-svg[data-pose="basket"] .pup-head { translate: 0 60px; }
+.pup-svg:is([data-pose="peek"], [data-pose="basket"]) .pup-world { translate: -62px 0; }
+.pup-svg[data-pose="basket"] .pup-shadow, .pup-svg[data-pose="peek"] .pup-shadow { opacity: 0; }
+.pup-svg .pup-world { transition: translate .28s var(--ease-pounce); }
+.pup-svg[data-duck] .pup-world { translate: -62px 70px; }
+
+.pup-svg .pup-headtilt { transform: rotate(var(--tilt, 0deg)); transition: transform .25s var(--ease-pounce); }
+.pup-svg[data-eyes="shut"] .eyes-open, .pup-svg[data-eyes="open"] .eyes-shut { display: none; }
+.pup-svg[data-mouth="open"] .mouth-closed, .pup-svg[data-mouth="closed"] .mouth-open { display: none; }
+.pup-svg .pupils { transform: translate(calc(var(--ox, 0) * 1px), calc(var(--oy, 0) * 1px)); }
+.pup-svg .eyes-open { transform-origin: 212px 88px; animation: pup-blink 5.5s infinite; }
+
+.pup-svg[data-wag="slow"] .pup-tail { animation: pup-wag 1.3s ease-in-out infinite; }
+.pup-svg[data-wag="fast"] .pup-tail { animation: pup-wag .3s ease-in-out infinite; }
+.pup-svg[data-wag="off"] .pup-tail { animation: none; }
+
+.pup-svg[data-stride="1"] .leg-a { animation: pup-swing-a .44s ease-in-out infinite; }
+.pup-svg[data-stride="1"] .leg-b { animation: pup-swing-b .44s ease-in-out infinite; }
+.pup-svg[data-stride="1"] :is(.pup-head, .pup-collar) { animation: pup-bob .22s ease-in-out infinite; }
+.pup-svg[data-air] .leg-a { transform: rotate(-38deg); }
+.pup-svg[data-air] .leg-b { transform: rotate(32deg); }
+.pup-svg[data-pose="sit"] .p-sit, .pup-svg[data-pose="stand"] .p-stand { animation: pup-breathe 3.8s ease-in-out infinite; transform-origin: 150px 228px; }
+
+@keyframes pup-wag { 0%, 100% { transform: rotate(-14deg); } 50% { transform: rotate(16deg); } }
+@keyframes pup-blink { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(.08); } }
+@keyframes pup-swing-a { 0%, 100% { transform: rotate(-26deg); } 50% { transform: rotate(26deg); } }
+@keyframes pup-swing-b { 0%, 100% { transform: rotate(26deg); } 50% { transform: rotate(-26deg); } }
+@keyframes pup-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes pup-breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.006, 1.014); } }
+
+/* the layer that carries the one-and-only roaming dog */
+.pup-layer { position: fixed; inset: 0; z-index: 30; pointer-events: none; overflow: clip; contain: layout paint style; }
+.pup-layer[data-front="false"] { z-index: 15; }
+.pup-actor { position: absolute; top: 0; left: 0; will-change: transform; }
+.pup-actor__body { width: 300px; transform-origin: 0 0; }
+.pup-actor__body > svg { width: 300px; height: 240px; }
+.pup-actor__body > svg[data-face="-1"] { transform: scaleX(-1); transform-origin: 150px 0; }
+.pup-actor svg :is(path, ellipse, circle, rect) { pointer-events: visiblePainted; cursor: url(/cursor/paw-press.svg) 9 6, pointer; }
+.pup-actor svg .pup-shadow { pointer-events: none; }
+.pup-bubble-at { position: absolute; top: 0; left: 0; }
+.pup-bubble {
+  position: absolute; left: 0; bottom: 0; transform: translate(-50%, 0); white-space: nowrap;
+  font-family: var(--font-hand); font-weight: 600; font-size: .95rem;
+  background: var(--color-milk); color: var(--color-cocoa); border: 2px solid var(--color-cocoa); border-radius: .85rem;
+  padding: .25rem .8rem; box-shadow: 0 3px 0 rgb(42 23 14 / .25);
+  opacity: 0; scale: .4; transform-origin: 50% 100%; transition: opacity .2s, scale .25s var(--ease-pounce);
+}
+.pup-bubble::after { content: ""; position: absolute; left: 50%; bottom: -7px; width: .7rem; height: .7rem; background: inherit; border: inherit; border-top: 0; border-left: 0; transform: translateX(-50%) rotate(45deg); }
+.pup-bubble[data-show="true"] { opacity: 1; scale: 1; }
+.pup-heart { position: absolute; color: var(--color-toffee); font-size: 1.3rem; line-height: 1; text-shadow: 0 1px 0 var(--color-milk); pointer-events: none; }
+.pup-prints { position: absolute; inset: 0; z-index: 5; pointer-events: none; overflow: clip; }
+.pup-prints > svg { position: absolute; top: 0; left: 0; width: 15px; height: 15px; fill: var(--color-toffee); opacity: 0; }
+
+/* static fallback inside each stop; hidden once the live dog takes over */
+.pup-stop { pointer-events: none; }
+.pup-stop > svg { width: 100%; }
+html[data-pup="live"] .pup-stop > svg { visibility: hidden; }
+.pup-front { position: relative; z-index: 20; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pup-svg * { animation: none !important; }
 }
